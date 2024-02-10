@@ -1,4 +1,4 @@
-module sshkeytest
+module github.com/nathanejohnson/sshkeytest
 
 go 1.21
 
