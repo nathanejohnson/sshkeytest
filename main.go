@@ -2,6 +2,7 @@ package main
 
 import (
 	"errors"
+	"flag"
 	"fmt"
 	"golang.org/x/crypto/ssh"
 	"io"
@@ -10,15 +11,20 @@ import (
 )
 
 func main() {
-	if len(os.Args) != 2 {
-		log.Fatalf("usage: %s [keyfile]", os.Args[1])
+	eeStatus := 0
+	fs := flag.NewFlagSet("sshkeytest", flag.ExitOnError)
+	fs.IntVar(&eeStatus, "encrypted-exit-status", eeStatus, "exit status for encrypted private keys")
+	fs.Parse(os.Args[1:])
+	args := fs.Args()
+	if len(args) != 1 {
+		log.Fatalf("usage: %s [keyfile]", os.Args[0])
 	}
-	k, err := testKey(os.Args[1])
+	k, err := testKey(args[0])
 	if err != nil {
 		var passMissing *ssh.PassphraseMissingError
 		if errors.As(err, &passMissing) {
-			fmt.Printf("key is encrypted")
-			return
+			fmt.Printf("key is encrypted\n")
+			os.Exit(eeStatus)
 		}
 		log.Fatalf("error processing key: %s", err)
 	}
